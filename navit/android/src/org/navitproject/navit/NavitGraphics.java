@@ -1022,6 +1022,9 @@ public class NavitGraphics
 	protected void draw_polygon(Paint paint, int c[])
 	{
 		//Log.e("NavitGraphics","draw_polygon");
+		boolean move = false;
+		int startx;
+		int starty;
 		paint.setStrokeWidth(c[0]);
 		paint.setARGB(c[1],c[2],c[3],c[4]);
 		paint.setStyle(Paint.Style.FILL);
@@ -1029,9 +1032,23 @@ public class NavitGraphics
 		//paint.setStrokeWidth(0);
 		Path path = new Path();
 		path.moveTo(c[5], c[6]);
+		startx = c[5];
+		starty = c[6];
 		for (int i = 7; i < c.length; i += 2)
 		{
-			path.lineTo(c[i], c[i + 1]);
+			if(move){ // if the polygon is closed, move to the next point to start another
+				path.moveTo(c[i], c[i + 1]);
+				startx = c[i];
+				starty = c[i + 1];
+				move = false;
+				Log.i("NavitGraphics","Moved Polygon Point i = " + i);
+			}else{
+				path.lineTo(c[i], c[i + 1]);
+				if (startx == c[i] && starty == c[i + 1]){
+					move = true;
+					Log.i("NavitGraphics","Move next Polygon Point i = " +i + "length = " + c.length);
+				}
+			}
 		}
 		//global_path.close();
 		draw_canvas.drawPath(path, paint);
