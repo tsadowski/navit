@@ -866,21 +866,47 @@ static void draw_lines(struct graphics_priv *gr, struct graphics_gc_priv *gc, st
     SelectObject( gr->hMemDC, hpenold);
 }
 
+/* Test to draw multipolygons as well */
 static void draw_polygon(struct graphics_priv *gr, struct graphics_gc_priv *gc, struct point *p, int count)
 {
     HPEN holdpen = SelectObject( gr->hMemDC, gc->hpen );
     HBRUSH holdbrush = SelectObject( gr->hMemDC, gc->hbrush );
-    if (sizeof(POINT) != sizeof(struct point)) {
-	    int i;
+    int lpPts[255];
+    int nPolygons = 0;
+    lpPts[nPolygons] = 1;
+    int move = 0;
+    int firstX = p[0].x;
+    int firstY = p[0].y;
+//    if (sizeof(POINT) != sizeof(struct point)) {
+	    int i = 0;
 	    POINT* points=g_alloca(sizeof(POINT)*count);
-	    for ( i=0;i< count; i++ )
+	    points[i].x = p[i].x;
+	    points[i].y = p[i].y;
+	    for ( i=1;i< count; i++ )
 	    {
 		points[i].x = p[i].x;
 		points[i].y = p[i].y;
+		lpPts[nPolygons] = lpPts[nPolygons] +1;
+		if (!move && firstX ==p[i].x && firstY == p[i].y )
+		{
+			nPolygons ++;
+			lpPts[nPolygons] = 0;
+			move = 1;
+			if ( i < count -1)
+			{
+				firstX = p[i + 1].x;
+				firstY = p[i + 1].y;
+			}
+		}
+		else
+		{
+			move = 0;
+		}
 	    }
-            Polygon( gr->hMemDC, points,count );
-    } else
-	    Polygon( gr->hMemDC, (POINT *)p, count);
+	      PolyPolygon( gr->hMemDC, points, lpPts, nPolygons );
+//            Polygon( gr->hMemDC, points,count );
+//    } else
+//	    Polygon( gr->hMemDC, (POINT *)p, count);
     SelectObject( gr->hMemDC, holdbrush);
     SelectObject( gr->hMemDC, holdpen);
 }
