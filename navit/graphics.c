@@ -2134,7 +2134,8 @@ displayitem_draw(struct displayitem *di, void *dummy, struct display_context *dc
 		count=transform(dc->trans, dc->pro, di->c, pa, count, mindist, 0, NULL);
 	switch (e->type) {
 	case element_polygon:
-		graphics_draw_polygon_clipped(gra, gc, pa, count);
+		gra->meth.draw_polygon(gra->priv, gc->priv, pa, count);
+		//graphics_draw_polygon_clipped(gra, gc, pa, count);
 		break;
 	case element_polyline:
 		{	
